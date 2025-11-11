@@ -20,6 +20,12 @@ public class UsuarioController {
         return usuarioService.listar();
     }
 
+    @GetMapping("/{id}")
+    public Usuario obtenerPorId(@PathVariable Long id) {
+        return usuarioService.obtenerPorId(id);
+    }
+
+
     @PostMapping
     public Usuario crear(@RequestBody Usuario usuario) {
         return usuarioService.guardar(usuario);
