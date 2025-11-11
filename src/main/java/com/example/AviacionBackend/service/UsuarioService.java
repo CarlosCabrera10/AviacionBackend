@@ -4,6 +4,7 @@ package com.example.AviacionBackend.service;
 import com.example.AviacionBackend.model.Usuario;
 import com.example.AviacionBackend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<Usuario> listar() {
         return usuarioRepository.findAll();
@@ -24,9 +26,13 @@ public class UsuarioService {
     }
 
     public Usuario guardar(Usuario usuario) {
+        // ✅ Encriptar la contraseña solo si no está vacía ni ya encriptada
+        if (usuario.getContrasena() != null && !usuario.getContrasena().startsWith("$2a$")) {
+            usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        }
+
         return usuarioRepository.save(usuario);
     }
-
     public Usuario actualizar(Long id, Usuario datos) {
         return usuarioRepository.findById(id)
                 .map(u -> {
