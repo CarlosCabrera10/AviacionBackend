@@ -1,6 +1,5 @@
 package com.example.AviacionBackend.security;
 
-
 import com.example.AviacionBackend.repository.UsuarioRepository;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -22,12 +21,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
         this.usuarioRepository = usuarioRepository;
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        System.out.println("🔎 Path recibido: " + request.getServletPath());
+
+        String path = request.getServletPath();
+
+        // 🔹 Ignorar rutas públicas
+        if (path.startsWith("/api/auth") || path.startsWith("/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         final String authHeader = request.getHeader("Authorization");
         final String token;
@@ -52,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 }

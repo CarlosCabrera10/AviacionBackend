@@ -2,6 +2,7 @@ package com.example.AviacionBackend.controller;
 
 import com.example.AviacionBackend.model.Usuario;
 import com.example.AviacionBackend.service.AuthService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,17 +18,36 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @PostMapping("/hash")
+    public Map<String, String> generarHash(@RequestBody Map<String, String> request) {
+        String contrasena = request.get("contrasena");
+        String hash = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(contrasena);
+        return Map.of("hash", hash);
+    }
+
     @PostMapping("/register")
-    public Usuario registrar(@RequestBody Usuario usuario) {
-        return authService.registrar(usuario);
+    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+        try {
+            Usuario nuevo = authService.registrar(usuario);
+            return ResponseEntity.ok(nuevo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody Map<String, String> loginData) {
-        String correo = loginData.get("correo");
-        String contrasena = loginData.get("contrasena");
-        String token = authService.login(correo, contrasena);
-        return Map.of("token", token);
-    }
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
+        try {
+            String correo = loginData.get("correo");
+            String contrasena = loginData.get("contrasena");
 
+            // 🔹 Login que devuelve token + usuario
+            Map<String, Object> respuesta = authService.loginConUsuario(correo, contrasena);
+
+            return ResponseEntity.ok(respuesta);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+        }
+    }
 }
