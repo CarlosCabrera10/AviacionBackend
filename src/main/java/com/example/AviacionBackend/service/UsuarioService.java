@@ -34,6 +34,12 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
     public Usuario actualizar(Long id, Usuario datos) {
+
+        // Supongamos que enviamos el id del usuario autenticado en datos.id (Temporal)
+        if (Boolean.FALSE.equals(datos.getActivo()) && datos.getId().equals(id)) {
+            throw new RuntimeException("No puedes desactivar tu propio usuario");
+        }
+
         return usuarioRepository.findById(id)
                 .map(u -> {
                     u.setNombre(datos.getNombre());
@@ -45,7 +51,13 @@ public class UsuarioService {
 
                     // Solo actualizar contraseña si se envía y no está vacía
                     if (datos.getContrasena() != null && !datos.getContrasena().isBlank()) {
-                        u.setContrasena(datos.getContrasena());
+
+                        // Encriptar si no está encriptada
+                        if (!datos.getContrasena().startsWith("$2a$")) {
+                            u.setContrasena(passwordEncoder.encode(datos.getContrasena()));
+                        } else {
+                            u.setContrasena(datos.getContrasena());
+                        }
                     }
 
                     return usuarioRepository.save(u);

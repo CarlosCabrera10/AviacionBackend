@@ -21,6 +21,11 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    public Usuario buscarPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo).orElse(null);
+    }
+
+
     // Método de registro
     public Usuario registrar(Usuario usuario) {
         if (usuarioRepository.findByCorreo(usuario.getCorreo()).isPresent()) {

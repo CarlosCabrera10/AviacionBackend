@@ -41,7 +41,18 @@ public class AuthController {
             String correo = loginData.get("correo");
             String contrasena = loginData.get("contrasena");
 
-            // 🔹 Login que devuelve token + usuario
+            // 🔥 VALIDAR SI EL USUARIO ESTÁ INACTIVO (ANTES DE LOGEARLO)
+            Usuario usuario = authService.buscarPorCorreo(correo);
+
+            if (usuario == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Usuario o contraseña incorrectos"));
+            }
+
+            if (!usuario.getActivo()) {
+                return ResponseEntity.status(403).body(Map.of("error", "Tu usuario está inactivo, contacta al administrador"));
+            }
+
+            // Si todo ok → login normal
             Map<String, Object> respuesta = authService.loginConUsuario(correo, contrasena);
 
             return ResponseEntity.ok(respuesta);

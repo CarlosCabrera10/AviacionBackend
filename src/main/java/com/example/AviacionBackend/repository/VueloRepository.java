@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface VueloRepository extends JpaRepository<Vuelo, Long> {
     List<Vuelo> findByTutor_id(Long tutorId);
+    List<Vuelo> findByEstadoNotAndAlumno_ActivoTrueAndTutor_ActivoTrue(Vuelo.Estado estado);
+
 }
