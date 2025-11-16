@@ -2,10 +2,13 @@ package com.example.AviacionBackend.service;
 
 
 import com.example.AviacionBackend.model.Usuario;
+import com.example.AviacionBackend.model.dto.PerfilUpdateDTO;
+import com.example.AviacionBackend.model.dto.UsuarioDTO;
 import com.example.AviacionBackend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
@@ -69,4 +72,69 @@ public class UsuarioService {
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }
+
+
+    public UsuarioDTO obtenerPerfil(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setIdUsuario(usuario.getId());
+        dto.setNombre(usuario.getNombre());
+        dto.setApellido(usuario.getApellido());
+        dto.setCorreo(usuario.getCorreo());
+        dto.setTelefono(usuario.getTelefono());
+        dto.setRol(String.valueOf(usuario.getRol()));
+        dto.setActivo(usuario.getActivo());
+
+        return dto;
+    }
+
+    public UsuarioDTO actualizarPerfil(Long id, PerfilUpdateDTO data) {
+
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // ==============================
+        // VALIDAR CORREO DUPLICADO
+        // ==============================
+        if (data.getCorreo() == null || data.getCorreo().isBlank()) {
+            throw new RuntimeException("El correo no puede estar vacío");
+        }
+
+        boolean correoEnUso = usuarioRepository.existsByCorreoAndIdNot(
+                data.getCorreo(),
+                usuario.getId()
+        );
+
+
+        if (correoEnUso) {
+            throw new RuntimeException("El correo ingresado ya está registrado por otro usuario");
+        }
+
+        // ==============================
+        // ACTUALIZAR CAMPOS
+        // ==============================
+        if (!usuario.getRol().equals("Alumno")) {
+            usuario.setNombre(data.getNombre());
+            usuario.setApellido(data.getApellido());
+        }
+
+        usuario.setCorreo(data.getCorreo());
+        usuario.setTelefono(data.getTelefono());
+
+        // ==============================
+        // CAMBIAR CONTRASEÑA SI HAY INPUT
+        // ==============================
+        if (data.getNuevaContrasena() != null && !data.getNuevaContrasena().isBlank()) {
+            usuario.setContrasena(passwordEncoder.encode(data.getNuevaContrasena()));
+        }
+
+        usuarioRepository.save(usuario);
+
+        return obtenerPerfil(id);
+    }
+
+
+
 }
