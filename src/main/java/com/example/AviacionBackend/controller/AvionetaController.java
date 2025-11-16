@@ -3,6 +3,7 @@ package com.example.AviacionBackend.controller;
 import com.example.AviacionBackend.model.Avioneta;
 import com.example.AviacionBackend.service.AvionetaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,4 +40,12 @@ public class AvionetaController {
     public void eliminar(@PathVariable Long id) {
         avionetaService.eliminar(id);
     }
+
+    @PutMapping("/{id}/desactivar")
+    public ResponseEntity<Avioneta> desactivar(@PathVariable Long id) {
+        Avioneta av = avionetaService.desactivar(id);
+        return ResponseEntity.ok(av);  // devuelve JSON del objeto
+    }
+
+
 }

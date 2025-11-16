@@ -22,7 +22,8 @@ public class VueloDTO {
     private String codigoAvioneta;
 
     private LocalDate fecha;
-    private LocalTime hora;
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
     private Vuelo.Estado estado;
     private String observacion;
 }

@@ -27,8 +27,17 @@ public class Vuelo {
     @JoinColumn(name = "id_avioneta", nullable = false)
     private Avioneta avioneta;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_espacio")       // 👈 FALTABA ESTO
+    private EspacioVuelo espacioVuelo;
+
     private LocalDate fecha;
-    private LocalTime hora;
+
+    @Column(name = "hora_inicio")
+    private LocalTime horaInicio;
+
+    @Column(name = "hora_fin")
+    private LocalTime horaFin;
 
     @Enumerated(EnumType.STRING)
     private Estado estado = Estado.Programado;
