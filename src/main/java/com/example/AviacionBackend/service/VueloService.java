@@ -1,12 +1,14 @@
 package com.example.AviacionBackend.service;
 
-import com.example.AviacionBackend.model.dto.VueloDTO;
 import com.example.AviacionBackend.model.Avioneta;
 import com.example.AviacionBackend.model.Usuario;
 import com.example.AviacionBackend.model.Vuelo;
+import com.example.AviacionBackend.model.EspacioVuelo;
+import com.example.AviacionBackend.model.dto.VueloDTO;
 import com.example.AviacionBackend.repository.AvionetaRepository;
 import com.example.AviacionBackend.repository.UsuarioRepository;
 import com.example.AviacionBackend.repository.VueloRepository;
+import com.example.AviacionBackend.repository.EspacioVueloRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,98 +22,127 @@ public class VueloService {
     private final VueloRepository vueloRepository;
     private final UsuarioRepository usuarioRepository;
     private final AvionetaRepository avionetaRepository;
+    private final EspacioVueloRepository espacioVueloRepository;
 
-    // Convertir entidad a DTO
-    public VueloDTO convertirADTO(Vuelo vuelo) {
-        VueloDTO dto = new VueloDTO();
-        dto.setIdVuelo(vuelo.getIdVuelo());
-        dto.setIdAlumno(vuelo.getAlumno().getId());
-        dto.setIdTutor(vuelo.getTutor().getId());
-        dto.setIdAvioneta(vuelo.getAvioneta().getIdAvioneta());
+    // -----------------------------
+    //        MÉTODOS USANDO DTO
+    // -----------------------------
 
-        dto.setNombreAlumno(vuelo.getAlumno().getNombre() + " " + vuelo.getAlumno().getApellido());
-        dto.setNombreTutor(vuelo.getTutor().getNombre() + " " + vuelo.getTutor().getApellido());
-        dto.setCodigoAvioneta(vuelo.getAvioneta().getCodigo());
-
-        dto.setFecha(vuelo.getFecha());
-        dto.setHora(vuelo.getHora());
-        dto.setEstado(vuelo.getEstado());
-        dto.setObservacion(vuelo.getObservacion());
-        return dto;
-    }
-
-    // Listar todos los vuelos como DTO
     public List<VueloDTO> listar() {
         return vueloRepository.findAll()
                 .stream()
-                .map(this::convertirADTO)
+                .map(this::convertirA_DTO)
                 .collect(Collectors.toList());
     }
 
-    // Obtener un vuelo por ID como DTO
     public VueloDTO obtenerPorId(Long id) {
-        return vueloRepository.findById(id)
-                .map(this::convertirADTO)
+        Vuelo vuelo = vueloRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vuelo no encontrado"));
+
+        return convertirA_DTO(vuelo);
     }
 
-    // Guardar un vuelo usando DTO
     public VueloDTO guardar(VueloDTO dto) {
+
         Vuelo vuelo = new Vuelo();
+
+        vuelo.setFecha(dto.getFecha());
+        vuelo.setHoraInicio(dto.getHoraInicio());
+        vuelo.setHoraFin(dto.getHoraFin());
+        vuelo.setEstado(dto.getEstado());
+        vuelo.setObservacion(dto.getObservacion());
 
         Usuario alumno = usuarioRepository.findById(dto.getIdAlumno())
                 .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
+
         Usuario tutor = usuarioRepository.findById(dto.getIdTutor())
                 .orElseThrow(() -> new RuntimeException("Tutor no encontrado"));
+
         Avioneta avioneta = avionetaRepository.findById(dto.getIdAvioneta())
                 .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
 
         vuelo.setAlumno(alumno);
         vuelo.setTutor(tutor);
         vuelo.setAvioneta(avioneta);
-        vuelo.setFecha(dto.getFecha());
-        vuelo.setHora(dto.getHora());
-        vuelo.setEstado(dto.getEstado() != null ? dto.getEstado() : Vuelo.Estado.Programado);
-        vuelo.setObservacion(dto.getObservacion());
 
         Vuelo guardado = vueloRepository.save(vuelo);
-        return convertirADTO(guardado);
+
+        return convertirA_DTO(guardado);
     }
 
-    // Actualizar un vuelo existente usando DTO
     public VueloDTO actualizar(Long id, VueloDTO dto) {
-        Vuelo vueloExistente = vueloRepository.findById(id)
+        Vuelo vuelo = vueloRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vuelo no encontrado"));
 
-        Usuario alumno = usuarioRepository.findById(dto.getIdAlumno())
-                .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
-        Usuario tutor = usuarioRepository.findById(dto.getIdTutor())
-                .orElseThrow(() -> new RuntimeException("Tutor no encontrado"));
-        Avioneta avioneta = avionetaRepository.findById(dto.getIdAvioneta())
-                .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
+        if (dto.getFecha() != null) vuelo.setFecha(dto.getFecha());
+        if (dto.getHoraInicio() != null) vuelo.setHoraInicio(dto.getHoraInicio());
+        if (dto.getHoraFin() != null) vuelo.setHoraFin(dto.getHoraFin());
+        if (dto.getEstado() != null) vuelo.setEstado(dto.getEstado());
+        if (dto.getObservacion() != null) vuelo.setObservacion(dto.getObservacion());
 
-        vueloExistente.setAlumno(alumno);
-        vueloExistente.setTutor(tutor);
-        vueloExistente.setAvioneta(avioneta);
-        vueloExistente.setFecha(dto.getFecha());
-        vueloExistente.setHora(dto.getHora());
-        vueloExistente.setEstado(dto.getEstado() != null ? dto.getEstado() : Vuelo.Estado.Programado);
-        vueloExistente.setObservacion(dto.getObservacion());
+        if (dto.getIdAlumno() != null) {
+            Usuario alumno = usuarioRepository.findById(dto.getIdAlumno())
+                    .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
+            vuelo.setAlumno(alumno);
+        }
 
-        Vuelo actualizado = vueloRepository.save(vueloExistente);
-        return convertirADTO(actualizado);
+        if (dto.getIdTutor() != null) {
+            Usuario tutor = usuarioRepository.findById(dto.getIdTutor())
+                    .orElseThrow(() -> new RuntimeException("Tutor no encontrado"));
+            vuelo.setTutor(tutor);
+        }
+
+        if (dto.getIdAvioneta() != null) {
+            Avioneta avioneta = avionetaRepository.findById(dto.getIdAvioneta())
+                    .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
+            vuelo.setAvioneta(avioneta);
+        }
+
+        Vuelo actualizado = vueloRepository.save(vuelo);
+
+        return convertirA_DTO(actualizado);
     }
 
-    // Eliminar vuelo
+    public List<VueloDTO> listarPorTutor(Long idTutor) {
+        return vueloRepository.findByTutor_id(idTutor)
+                .stream()
+                .map(this::convertirA_DTO)
+                .collect(Collectors.toList());
+    }
+
     public void eliminar(Long id) {
         vueloRepository.deleteById(id);
     }
 
-    // Listar vuelos por tutor
-    public List<VueloDTO> listarPorTutor(Long idTutor) {
-        return vueloRepository.findByTutor_id(idTutor)
-                .stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
+    // -----------------------------
+    //            MAPPER
+    // -----------------------------
+    private VueloDTO convertirA_DTO(Vuelo v) {
+
+        VueloDTO dto = new VueloDTO();
+
+        dto.setIdVuelo(v.getIdVuelo());
+        dto.setFecha(v.getFecha());
+        dto.setHoraInicio(v.getHoraInicio());
+        dto.setHoraFin(v.getHoraFin());
+        dto.setEstado(v.getEstado());
+        dto.setObservacion(v.getObservacion());
+
+        if (v.getAlumno() != null) {
+            dto.setIdAlumno(v.getAlumno().getId());
+            dto.setNombreAlumno(v.getAlumno().getNombre());
+        }
+
+        if (v.getTutor() != null) {
+            dto.setIdTutor(v.getTutor().getId());
+            dto.setNombreTutor(v.getTutor().getNombre());
+        }
+
+        if (v.getAvioneta() != null) {
+            dto.setIdAvioneta(v.getAvioneta().getIdAvioneta());
+            dto.setCodigoAvioneta(v.getAvioneta().getCodigo());
+        }
+
+        return dto;
     }
 }

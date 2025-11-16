@@ -41,4 +41,14 @@ public class AvionetaService {
     public void eliminar(Long id) {
         avionetaRepository.deleteById(id);
     }
+
+    public Avioneta desactivar(Long id) {
+        Avioneta av = avionetaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No existe la avioneta"));
+
+        av.setEstado(Avioneta.EstadoAvioneta.Desactivada);
+        return avionetaRepository.save(av);  // devuelve el objeto actualizado
+    }
+
+
 }

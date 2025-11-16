@@ -9,43 +9,42 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/vuelos")
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class VueloController {
 
     private final VueloService vueloService;
 
-    // Listar todos los vuelos como DTO
+    // LISTAR TODOS LOS VUELOS
     @GetMapping
     public List<VueloDTO> listar() {
         return vueloService.listar();
     }
 
-    // Obtener un vuelo por ID como DTO
+    // OBTENER VUELO POR ID
     @GetMapping("/{id}")
     public VueloDTO obtenerPorId(@PathVariable Long id) {
         return vueloService.obtenerPorId(id);
     }
 
-    // Crear un vuelo usando DTO
+    // CREAR VUELO
     @PostMapping
-    public VueloDTO crear(@RequestBody VueloDTO dto) {
+    public VueloDTO guardar(@RequestBody VueloDTO dto) {
         return vueloService.guardar(dto);
     }
 
-    // Actualizar un vuelo usando DTO
+    // ACTUALIZAR VUELO
     @PutMapping("/{id}")
     public VueloDTO actualizar(@PathVariable Long id, @RequestBody VueloDTO dto) {
         return vueloService.actualizar(id, dto);
     }
 
-    // Eliminar vuelo
+    // ELIMINAR VUELO
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Long id) {
         vueloService.eliminar(id);
     }
 
-    // Listar vuelos por tutor
+    // LISTAR VUELOS POR TUTOR
     @GetMapping("/tutor/{idTutor}")
     public List<VueloDTO> listarPorTutor(@PathVariable Long idTutor) {
         return vueloService.listarPorTutor(idTutor);

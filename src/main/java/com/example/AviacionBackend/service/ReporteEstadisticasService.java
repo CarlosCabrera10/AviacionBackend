@@ -16,39 +16,33 @@ public class ReporteEstadisticasService {
 
     private final VueloRepository vueloRepository;
 
-    // Método para obtener solo vuelos válidos (no cancelados y usuarios activos)
+    // Obtener vuelos válidos
     private List<Vuelo> obtenerVuelosValidos() {
         return vueloRepository
                 .findByEstadoNotAndAlumno_ActivoTrueAndTutor_ActivoTrue(Vuelo.Estado.Cancelado);
     }
 
-    // 1️⃣ Actividad por día (para heatmap)
+    // 1️⃣ Actividad por día
     public Map<LocalDate, Long> actividadPorDia() {
-        List<Vuelo> vuelos = obtenerVuelosValidos();
-
-        return vuelos.stream()
+        return obtenerVuelosValidos().stream()
                 .collect(Collectors.groupingBy(
                         Vuelo::getFecha,
                         Collectors.counting()
                 ));
     }
 
-    // 2️⃣ Actividad por hora
+    // 2️⃣ Actividad por hora (usamos horaInicio)
     public Map<Integer, Long> actividadPorHora() {
-        List<Vuelo> vuelos = obtenerVuelosValidos();
-
-        return vuelos.stream()
+        return obtenerVuelosValidos().stream()
                 .collect(Collectors.groupingBy(
-                        v -> v.getHora().getHour(),
+                        v -> v.getHoraInicio().getHour(),
                         Collectors.counting()
                 ));
     }
 
     // 3️⃣ Uso de avionetas
     public Map<String, Long> usoAvionetas() {
-        List<Vuelo> vuelos = obtenerVuelosValidos();
-
-        return vuelos.stream()
+        return obtenerVuelosValidos().stream()
                 .collect(Collectors.groupingBy(
                         v -> v.getAvioneta().getModelo(),
                         Collectors.counting()
@@ -57,9 +51,7 @@ public class ReporteEstadisticasService {
 
     // 4️⃣ Actividad de tutores
     public Map<String, Long> tutoresActivos() {
-        List<Vuelo> vuelos = obtenerVuelosValidos();
-
-        return vuelos.stream()
+        return obtenerVuelosValidos().stream()
                 .collect(Collectors.groupingBy(
                         v -> v.getTutor().getNombre() + " " + v.getTutor().getApellido(),
                         Collectors.counting()
@@ -68,9 +60,7 @@ public class ReporteEstadisticasService {
 
     // 5️⃣ Actividad de alumnos
     public Map<String, Long> alumnosActivos() {
-        List<Vuelo> vuelos = obtenerVuelosValidos();
-
-        return vuelos.stream()
+        return obtenerVuelosValidos().stream()
                 .collect(Collectors.groupingBy(
                         v -> v.getAlumno().getNombre() + " " + v.getAlumno().getApellido(),
                         Collectors.counting()
