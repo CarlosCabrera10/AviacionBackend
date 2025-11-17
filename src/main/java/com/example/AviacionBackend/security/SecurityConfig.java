@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/auth/**").permitAll() // 🔹 Permite ambas rutas
+                        .requestMatchers("/api/auth/**", "/auth/**", "/api/weather/**"   ).permitAll() // 🔹 Permite ambas rutas
                         .anyRequest().authenticated()
                 )
 
