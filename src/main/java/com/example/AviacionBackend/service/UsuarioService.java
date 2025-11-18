@@ -79,7 +79,7 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         UsuarioDTO dto = new UsuarioDTO();
-        dto.setIdUsuario(usuario.getId());
+        dto.setId(usuario.getId());
         dto.setNombre(usuario.getNombre());
         dto.setApellido(usuario.getApellido());
         dto.setCorreo(usuario.getCorreo());
