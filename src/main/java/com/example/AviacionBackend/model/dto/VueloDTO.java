@@ -11,19 +11,26 @@ public class VueloDTO {
 
     private Long idVuelo;
 
-    // IDs para relacionar
+    // IDs para relaciones
     private Long idAlumno;
     private Long idTutor;
     private Long idAvioneta;
+    private Long idEspacioVuelo;
 
-    // Campos legibles para mostrar en el frontend
+    // Campos para mostrar en frontend
     private String nombreAlumno;
     private String nombreTutor;
     private String codigoAvioneta;
+    private String nombreEspacio;
 
+    // Estado REAL de la avioneta (String)
+    private String estadoAvioneta;
+
+    // Datos del vuelo
     private LocalDate fecha;
     private LocalTime horaInicio;
     private LocalTime horaFin;
     private Vuelo.Estado estado;
+
     private String observacion;
 }
