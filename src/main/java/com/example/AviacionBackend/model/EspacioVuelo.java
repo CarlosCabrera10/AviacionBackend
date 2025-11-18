@@ -11,7 +11,7 @@ public class EspacioVuelo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_espacio")
-    private Long idEspacio;
+    private Long idEspacioVuelo;
 
     private String nombre;
     private String tipo;

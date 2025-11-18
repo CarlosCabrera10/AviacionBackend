@@ -7,6 +7,7 @@ import com.example.AviacionBackend.repository.MantenimientoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,11 +31,15 @@ public class MantenimientoService {
         Avioneta avioneta = avionetaRepository.findById(datos.getAvioneta().getIdAvioneta())
                 .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
 
-        // 🔥 Cuando se crea un mantenimiento → pasar avioneta a Mantenimiento
+        // Al crear un mantenimiento, poner avioneta en estado Mantenimiento
         avioneta.setEstado(Avioneta.EstadoAvioneta.Mantenimiento);
         avionetaRepository.save(avioneta);
 
+        // Forzar fechas al crear
+        datos.setFechaInicio(LocalDateTime.now());
+        datos.setFechaFin(null);
         datos.setAvioneta(avioneta);
+
         return mantenimientoRepository.save(datos);
     }
 
@@ -43,21 +48,28 @@ public class MantenimientoService {
 
             if (datos.getDescripcion() != null) m.setDescripcion(datos.getDescripcion());
             if (datos.getTipo() != null) m.setTipo(datos.getTipo());
+            if (datos.getNotas() != null) m.setNotas(datos.getNotas());
+
+            // Actualizar estado y fechas
             if (datos.getEstado() != null) {
-
                 m.setEstado(datos.getEstado());
+                Avioneta avioneta = m.getAvioneta();
 
-                // 🔥 Si el mantenimiento se marca como FINALIZADO → avioneta vuelve a ACTIVE
-                if (datos.getEstado().equals("Finalizado")) {
-                    Avioneta avioneta = m.getAvioneta();
+                if (datos.getEstado() == Mantenimiento.Estado.Finalizado) {
                     avioneta.setEstado(Avioneta.EstadoAvioneta.Activo);
-                    avionetaRepository.save(avioneta);
+                    if (m.getFechaFin() == null) {
+                        m.setFechaFin(LocalDateTime.now());
+                    }
+                } else if (datos.getEstado() == Mantenimiento.Estado.En_proceso) {
+                    avioneta.setEstado(Avioneta.EstadoAvioneta.Mantenimiento);
+                    m.setFechaInicio(LocalDateTime.now());
+                    m.setFechaFin(null);
                 }
+
+                avionetaRepository.save(avioneta);
             }
 
-            if (datos.getNotas() != null) m.setNotas(datos.getNotas());
-            if (datos.getFechaFin() != null) m.setFechaFin(datos.getFechaFin());
-
+            // Actualizar la avioneta si se cambia
             if (datos.getAvioneta() != null) {
                 Avioneta avioneta = avionetaRepository.findById(datos.getAvioneta().getIdAvioneta())
                         .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
@@ -67,10 +79,6 @@ public class MantenimientoService {
             return mantenimientoRepository.save(m);
 
         }).orElseThrow(() -> new RuntimeException("Mantenimiento no encontrado"));
-    }
-
-    public void eliminar(Long id) {
-        mantenimientoRepository.deleteById(id);
     }
 
     public List<Mantenimiento> listarPorAvioneta(Long idAvioneta) {

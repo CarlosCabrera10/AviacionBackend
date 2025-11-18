@@ -14,7 +14,7 @@ public class Mantenimiento {
     @Column(name = "id_mantenimiento")
     private Long idMantenimiento;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_avioneta", nullable = false)
     private Avioneta avioneta;
 
@@ -24,7 +24,7 @@ public class Mantenimiento {
     @Column(nullable = false)
     private String tipo;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = EstadoConverter.class)
     @Column(nullable = false)
     private Estado estado = Estado.En_proceso;
 
@@ -41,5 +41,28 @@ public class Mantenimiento {
         En_proceso,
         Finalizado,
         Pausado
+    }
+
+    @Converter(autoApply = true)
+    public static class EstadoConverter implements AttributeConverter<Estado, String> {
+
+        @Override
+        public String convertToDatabaseColumn(Estado estado) {
+            return switch (estado) {
+                case En_proceso -> "En proceso";
+                case Finalizado -> "Finalizado";
+                case Pausado -> "Pausado";
+            };
+        }
+
+        @Override
+        public Estado convertToEntityAttribute(String dbData) {
+            return switch (dbData) {
+                case "En proceso" -> Estado.En_proceso;
+                case "Finalizado" -> Estado.Finalizado;
+                case "Pausado" -> Estado.Pausado;
+                default -> throw new IllegalArgumentException("Valor desconocido: " + dbData);
+            };
+        }
     }
 }
