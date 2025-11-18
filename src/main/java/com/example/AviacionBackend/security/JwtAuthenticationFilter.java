@@ -1,6 +1,5 @@
 package com.example.AviacionBackend.security;
 
-
 import com.example.AviacionBackend.repository.UsuarioRepository;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -22,12 +22,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
         this.usuarioRepository = usuarioRepository;
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+        System.out.println("🔎 Path recibido: " + request.getServletPath());
+
+        String path = request.getServletPath();
+
+        // 🔹 Ignorar rutas públicas
+        if (path.startsWith("/api/auth") || path.startsWith("/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         final String authHeader = request.getHeader("Authorization");
         final String token;
@@ -46,12 +54,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (usuario != null && jwtService.esTokenValido(token, correo)) {
                 var authToken = new UsernamePasswordAuthenticationToken(
-                        usuario, null, null
+                        usuario,
+                        null,
+                        List.of(() -> "ROLE_" + usuario.getRol().name())
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+
         }
+
         filterChain.doFilter(request, response);
     }
 }

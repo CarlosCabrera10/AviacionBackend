@@ -2,45 +2,50 @@ package com.example.AviacionBackend.controller;
 
 import com.example.AviacionBackend.model.Avioneta;
 import com.example.AviacionBackend.service.AvionetaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/avionetas")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200") // Permitir Angular local
+@RequiredArgsConstructor
 public class AvionetaController {
 
     private final AvionetaService avionetaService;
 
-    public AvionetaController(AvionetaService avionetaService) {
-        this.avionetaService = avionetaService;
-    }
-
     @GetMapping
-    public List<Avioneta> listarAvionetas() {
-        return avionetaService.obtenerTodas();
+    public List<Avioneta> listar() {
+        return avionetaService.listar();
     }
 
     @GetMapping("/{id}")
-    public Optional<Avioneta> obtenerAvioneta(@PathVariable Long id) {
+    public Avioneta obtenerPorId(@PathVariable Long id) {
         return avionetaService.obtenerPorId(id);
     }
 
     @PostMapping
-    public Avioneta crearAvioneta(@RequestBody Avioneta avioneta) {
+    public Avioneta crear(@RequestBody Avioneta avioneta) {
         return avionetaService.guardar(avioneta);
     }
 
     @PutMapping("/{id}")
-    public Avioneta actualizarAvioneta(@PathVariable Long id, @RequestBody Avioneta avioneta) {
-        avioneta.setIdAvioneta(id);
-        return avionetaService.guardar(avioneta);
+    public Avioneta actualizar(@PathVariable Long id, @RequestBody Avioneta avioneta) {
+        return avionetaService.actualizar(id, avioneta);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarAvioneta(@PathVariable Long id) {
+    public void eliminar(@PathVariable Long id) {
         avionetaService.eliminar(id);
     }
+
+    @PutMapping("/{id}/desactivar")
+    public ResponseEntity<Avioneta> desactivar(@PathVariable Long id) {
+        Avioneta av = avionetaService.desactivar(id);
+        return ResponseEntity.ok(av);  // devuelve JSON del objeto
+    }
+
+
 }

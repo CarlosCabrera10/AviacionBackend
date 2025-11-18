@@ -27,6 +27,7 @@ public class Avioneta {
 
     public enum EstadoAvioneta {
         Activo,
-        Mantenimiento
+        Mantenimiento,
+        Desactivada
     }
 }

@@ -1,8 +1,11 @@
 package com.example.AviacionBackend.controller;
 
 import com.example.AviacionBackend.model.Usuario;
+import com.example.AviacionBackend.model.dto.PerfilUpdateDTO;
+import com.example.AviacionBackend.model.dto.UsuarioDTO;
 import com.example.AviacionBackend.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +23,12 @@ public class UsuarioController {
         return usuarioService.listar();
     }
 
+    @GetMapping("/{id}")
+    public Usuario obtenerPorId(@PathVariable Long id) {
+        return usuarioService.obtenerPorId(id);
+    }
+
+
     @PostMapping
     public Usuario crear(@RequestBody Usuario usuario) {
         return usuarioService.guardar(usuario);
@@ -34,4 +43,17 @@ public class UsuarioController {
     public void eliminar(@PathVariable Long id) {
         usuarioService.eliminar(id);
     }
+
+
+    @GetMapping("/perfil/{id}")
+    public UsuarioDTO obtenerPerfil(@PathVariable Long id) {
+        return usuarioService.obtenerPerfil(id);
+    }
+
+    @PutMapping("/perfil/{id}")
+    public UsuarioDTO actualizarPerfil(@PathVariable Long id, @RequestBody PerfilUpdateDTO dto) {
+        return usuarioService.actualizarPerfil(id, dto);
+    }
+
+
 }
