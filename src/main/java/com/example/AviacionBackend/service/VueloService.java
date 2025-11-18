@@ -25,9 +25,8 @@ public class VueloService {
     private final EspacioVueloRepository espacioVueloRepository;
 
     // -----------------------------
-    //        MÉTODOS USANDO DTO
+    // LISTAR
     // -----------------------------
-
     public List<VueloDTO> listar() {
         return vueloRepository.findAll()
                 .stream()
@@ -42,6 +41,9 @@ public class VueloService {
         return convertirA_DTO(vuelo);
     }
 
+    // -----------------------------
+    // GUARDAR
+    // -----------------------------
     public VueloDTO guardar(VueloDTO dto) {
 
         Vuelo vuelo = new Vuelo();
@@ -65,11 +67,23 @@ public class VueloService {
         vuelo.setTutor(tutor);
         vuelo.setAvioneta(avioneta);
 
+        if (dto.getIdEspacioVuelo() != null) {
+            EspacioVuelo espacio = espacioVueloRepository.findById(dto.getIdEspacioVuelo())
+                    .orElseThrow(() -> new RuntimeException("Espacio de vuelo no encontrado"));
+            vuelo.setEspacioVuelo(espacio);
+        }
+
+        // VALIDAR CHOQUES
+        validarConflictos(vuelo);
+
         Vuelo guardado = vueloRepository.save(vuelo);
 
         return convertirA_DTO(guardado);
     }
 
+    // -----------------------------
+    // ACTUALIZAR
+    // -----------------------------
     public VueloDTO actualizar(Long id, VueloDTO dto) {
         Vuelo vuelo = vueloRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vuelo no encontrado"));
@@ -98,9 +112,25 @@ public class VueloService {
             vuelo.setAvioneta(avioneta);
         }
 
+        if (dto.getIdEspacioVuelo() != null) {
+            EspacioVuelo espacio = espacioVueloRepository.findById(dto.getIdEspacioVuelo())
+                    .orElseThrow(() -> new RuntimeException("Espacio de vuelo no encontrado"));
+            vuelo.setEspacioVuelo(espacio);
+        }
+
+        // VALIDAR CHOQUES
+        validarConflictos(vuelo);
+
         Vuelo actualizado = vueloRepository.save(vuelo);
 
         return convertirA_DTO(actualizado);
+    }
+
+    // -----------------------------
+    // ELIMINAR
+    // -----------------------------
+    public void eliminar(Long id) {
+        vueloRepository.deleteById(id);
     }
 
     public List<VueloDTO> listarPorTutor(Long idTutor) {
@@ -110,12 +140,54 @@ public class VueloService {
                 .collect(Collectors.toList());
     }
 
-    public void eliminar(Long id) {
-        vueloRepository.deleteById(id);
+
+    // =============================
+    // VALIDACIÓN DE CHOQUES
+    // =============================
+    private void validarConflictos(Vuelo nuevo) {
+
+        List<Vuelo> existentes = vueloRepository
+                .findByFechaAndHoraInicioLessThanAndHoraFinGreaterThan(
+                        nuevo.getFecha(),
+                        nuevo.getHoraFin(),
+                        nuevo.getHoraInicio()
+                );
+
+        for (Vuelo v : existentes) {
+
+            // Evitar comparar contra sí mismo en actualización
+            if (nuevo.getIdVuelo() != null &&
+                    nuevo.getIdVuelo().equals(v.getIdVuelo())) continue;
+
+            // Alumno
+            if (v.getAlumno().getId().equals(nuevo.getAlumno().getId())) {
+                throw new RuntimeException("El alumno ya tiene un vuelo en ese horario.");
+            }
+
+            // Tutor
+            if (v.getTutor().getId().equals(nuevo.getTutor().getId())) {
+                throw new RuntimeException("El tutor ya tiene un vuelo en ese horario.");
+            }
+
+            // Avioneta
+            if (v.getAvioneta().getIdAvioneta().equals(nuevo.getAvioneta().getIdAvioneta())) {
+                throw new RuntimeException("La avioneta ya está asignada en ese horario.");
+            }
+
+            // Espacio de vuelo
+            if (v.getEspacioVuelo() != null &&
+                    nuevo.getEspacioVuelo() != null &&
+                    v.getEspacioVuelo().getIdEspacioVuelo().equals(
+                            nuevo.getEspacioVuelo().getIdEspacioVuelo()
+                    )) {
+                throw new RuntimeException("El espacio de vuelo ya está ocupado en ese horario.");
+            }
+        }
     }
 
+
     // -----------------------------
-    //            MAPPER
+    // MAPPER DTO
     // -----------------------------
     private VueloDTO convertirA_DTO(Vuelo v) {
 
@@ -141,6 +213,12 @@ public class VueloService {
         if (v.getAvioneta() != null) {
             dto.setIdAvioneta(v.getAvioneta().getIdAvioneta());
             dto.setCodigoAvioneta(v.getAvioneta().getCodigo());
+            dto.setEstadoAvioneta(v.getAvioneta().getEstado().name());
+        }
+
+        if (v.getEspacioVuelo() != null) {
+            dto.setIdEspacioVuelo(v.getEspacioVuelo().getIdEspacioVuelo());
+            dto.setNombreEspacio(v.getEspacioVuelo().getNombre());
         }
 
         return dto;

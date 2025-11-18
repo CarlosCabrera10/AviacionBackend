@@ -35,10 +35,7 @@ public class MantenimientoController {
         return mantenimientoService.actualizar(id, datos);
     }
 
-    @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Long id) {
-        mantenimientoService.eliminar(id);
-    }
+
 
     @GetMapping("/avioneta/{idAvioneta}")
     public List<Mantenimiento> listarPorAvioneta(@PathVariable Long idAvioneta) {
