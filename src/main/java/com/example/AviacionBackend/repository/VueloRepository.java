@@ -18,6 +18,7 @@ public interface VueloRepository extends JpaRepository<Vuelo, Long> {
             LocalTime horaFinNuevo,
             LocalTime horaInicioNuevo
     );
-
+    List<Vuelo> findByTutor_idAndAlumno_id(Long tutorId, Long alumnoId);
+    List<Vuelo> findByAlumno_Id(Long idAlumno);
 
 }
