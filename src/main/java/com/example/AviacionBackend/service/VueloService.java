@@ -152,62 +152,6 @@ public class VueloService {
         return convertirA_DTO(actualizado);
     }
 
-
-//    public VueloDTO actualizar(Long id, VueloDTO dto) {
-//        Vuelo vuelo = vueloRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Vuelo no encontrado"));
-//
-//        if (dto.getFecha() != null) vuelo.setFecha(dto.getFecha());
-//        if (dto.getHoraInicio() != null) vuelo.setHoraInicio(dto.getHoraInicio());
-//        if (dto.getHoraFin() != null) vuelo.setHoraFin(dto.getHoraFin());
-//        if (dto.getEstado() != null) vuelo.setEstado(dto.getEstado());
-//        if (dto.getObservacion() != null) vuelo.setObservacion(dto.getObservacion());
-//
-//        if (dto.getIdAlumno() != null) {
-//            Usuario alumno = usuarioRepository.findById(dto.getIdAlumno())
-//                    .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
-//            vuelo.setAlumno(alumno);
-//        }
-//
-//        if (dto.getIdTutor() != null) {
-//            Usuario tutor = usuarioRepository.findById(dto.getIdTutor())
-//                    .orElseThrow(() -> new RuntimeException("Tutor no encontrado"));
-//            vuelo.setTutor(tutor);
-//        }
-//
-//        if (dto.getIdAvioneta() != null) {
-//            Avioneta avioneta = avionetaRepository.findById(dto.getIdAvioneta())
-//                    .orElseThrow(() -> new RuntimeException("Avioneta no encontrada"));
-//            vuelo.setAvioneta(avioneta);
-//        }
-//
-//        if (dto.getIdEspacioVuelo() != null) {
-//            EspacioVuelo espacio = espacioVueloRepository.findById(dto.getIdEspacioVuelo())
-//                    .orElseThrow(() -> new RuntimeException("Espacio de vuelo no encontrado"));
-//            vuelo.setEspacioVuelo(espacio);
-//        }
-//
-//        // VALIDAR CHOQUES
-//        validarConflictos(vuelo);
-//        if (!vuelo.getEstado().equals(dto.getEstado())) {
-//
-//            String msg = switch (dto.getEstado()) {
-//                case Programado -> "Tu vuelo ha sido programado.";
-//                case Completado -> "Tu vuelo ha sido marcado como completado.";
-//                case Cancelado -> "Tu vuelo ha sido cancelado.";
-//            };
-//
-//            notificacionService.crearNotificacion(vuelo.getAlumno().getId(), msg);
-//        }
-//
-//        Vuelo actualizado = vueloRepository.save(vuelo);
-//
-//        return convertirA_DTO(actualizado);
-//    }
-
-    // -----------------------------
-    // ELIMINAR
-    // -----------------------------
     public void eliminar(Long id) {
         vueloRepository.deleteById(id);
     }
