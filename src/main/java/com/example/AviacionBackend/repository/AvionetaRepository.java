@@ -6,4 +6,6 @@ import com.example.AviacionBackend.model.Avioneta;
 
 @Repository
 public interface AvionetaRepository extends JpaRepository<Avioneta, Long> {
+
+
 }

@@ -20,5 +20,11 @@ public interface VueloRepository extends JpaRepository<Vuelo, Long> {
     );
     List<Vuelo> findByTutor_idAndAlumno_id(Long tutorId, Long alumnoId);
     List<Vuelo> findByAlumno_Id(Long idAlumno);
+    List<Vuelo> findByFechaBetweenAndEstadoIn(
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            List<Vuelo.Estado> estados
+    );
+
 
 }
