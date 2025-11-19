@@ -23,6 +23,7 @@ public class VueloService {
     private final UsuarioRepository usuarioRepository;
     private final AvionetaRepository avionetaRepository;
     private final EspacioVueloRepository espacioVueloRepository;
+    private final NotificacionService notificacionService;
 
     // -----------------------------
     // LISTAR
@@ -76,7 +77,14 @@ public class VueloService {
         // VALIDAR CHOQUES
         validarConflictos(vuelo);
 
+
         Vuelo guardado = vueloRepository.save(vuelo);
+
+        notificacionService.crearNotificacion(
+                dto.getIdAlumno(),
+                "Se te asignó el vuelo #" + guardado.getIdVuelo() +
+                        " programado para el día " + dto.getFecha()
+        );
 
         return convertirA_DTO(guardado);
     }
@@ -84,10 +92,15 @@ public class VueloService {
     // -----------------------------
     // ACTUALIZAR
     // -----------------------------
+
     public VueloDTO actualizar(Long id, VueloDTO dto) {
         Vuelo vuelo = vueloRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vuelo no encontrado"));
 
+        // Estado original ANTES de actualizar
+        Vuelo.Estado estadoOriginal = vuelo.getEstado();
+
+        // Actualizar datos
         if (dto.getFecha() != null) vuelo.setFecha(dto.getFecha());
         if (dto.getHoraInicio() != null) vuelo.setHoraInicio(dto.getHoraInicio());
         if (dto.getHoraFin() != null) vuelo.setHoraFin(dto.getHoraFin());
@@ -118,17 +131,27 @@ public class VueloService {
             vuelo.setEspacioVuelo(espacio);
         }
 
-        // VALIDAR CHOQUES
         validarConflictos(vuelo);
 
-        Vuelo actualizado = vueloRepository.save(vuelo);
+        // 🔥 Detectar cambio de estado
+        if (dto.getEstado() != null && estadoOriginal != dto.getEstado()) {
 
+            String msg = switch (dto.getEstado()) {
+                case Programado -> "El vuelo #" + id + " ha sido programado nuevamente.";
+                case Completado -> "El vuelo #" + id + " ha sido marcado como completado.";
+                case Cancelado -> "El vuelo #" + id + " ha sido cancelado.";
+            };
+
+            notificacionService.crearNotificacion(
+                    vuelo.getAlumno().getId(),
+                    msg
+            );
+        }
+
+        Vuelo actualizado = vueloRepository.save(vuelo);
         return convertirA_DTO(actualizado);
     }
 
-    // -----------------------------
-    // ELIMINAR
-    // -----------------------------
     public void eliminar(Long id) {
         vueloRepository.deleteById(id);
     }
