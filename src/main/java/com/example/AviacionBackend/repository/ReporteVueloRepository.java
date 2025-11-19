@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface ReporteVueloRepository extends JpaRepository<ReporteVuelo, Long> {
     List<ReporteVuelo> findByVuelo_IdVuelo(Long idVuelo);
+
 }
 
